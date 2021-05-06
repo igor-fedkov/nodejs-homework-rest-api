@@ -14,6 +14,7 @@ const schemaCreateContact = joi.object({
     .messages({
       'string.pattern.base': 'For the phone number allowed nambers, spaces and symbols: "+", "-", "(", ")"',
     }),
+  favorite: joi.bool().default(false)
 })
 
 const schemaUpdateContact = joi.object({
@@ -27,7 +28,13 @@ const schemaUpdateContact = joi.object({
     .messages({
       'string.pattern.base': 'For the phone number allowed nambers, spaces and symbols: "+", "-", "(", ")"',
     }),
+  favorite: joi.bool()
 }).min(1)
+
+const schemaUpdateStatusContact = joi.object({
+  favorite: joi.bool().required()
+    .messages({ 'any.required': 'missing field favorite' })
+})
 
 const validate = async (schema, obj, next) => {
   try {
@@ -47,5 +54,8 @@ module.exports = {
   },
   updateContact: async (req, res, next) => {
     return await validate(schemaUpdateContact, req.body, next)
+  },
+  updateStatusContact: async (req, res, next) => {
+    return await validate(schemaUpdateStatusContact, req.body, next)
   }
 }

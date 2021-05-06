@@ -1,87 +1,29 @@
-const fs = require('fs').promises
-const path = require('path')
-const contactsFile = path.resolve('./model/contacts.json')
-const shortId = require('shortid')
+const Contact = require('./schemas/contact')
 
-const onErr = err => {
-  console.log(err)
-  process.exit(1)
+const getAllContacts = async () => {
+  return await Contact.find()
 }
 
-// ---------------------------------------
-
-const listContacts = async () => {
-  // console.log(__dirname, contactsFile)
-  try {
-    const data = await fs.readFile(contactsFile)
-    return JSON.parse(data)
-  } catch (err) {
-    onErr(err)
-  }
+const getContactById = async (id) => {
+  return await Contact.findOne({ _id: id })
 }
 
-const getContactById = async (contactId) => {
-  try {
-    const contacts = await listContacts()
-    return contacts.find(({ id }) => id.toString() === contactId.toString())
-  } catch (err) {
-    onErr(err)
-  }
+const createContact = async contact => {
+  return await Contact.create(contact)
 }
 
-const removeContact = async (contactId) => {
-  try {
-    const contacts = await listContacts()
-    const newList = contacts.filter(({ id }) => id.toString() !== contactId.toString())
-
-    if (contacts.length !== newList.length) {
-      await fs.writeFile(contactsFile, JSON.stringify(newList))
-      return true
-    }
-    return false
-  } catch (err) {
-    onErr(err)
-  }
+const updateContact = async (id, fields) => {
+  return await Contact.findByIdAndUpdate({ _id: id }, { ...fields }, { new: true })
 }
 
-const addContact = async (body) => {
-  try {
-    const contacts = await listContacts()
-    const newContact = {
-      id: shortId(),
-      ...body,
-    }
-
-    await fs.writeFile(contactsFile, JSON.stringify([...contacts, newContact]))
-
-    return newContact
-  } catch (err) {
-    onErr(err)
-  }
-}
-
-const updateContact = async (contactId, body) => {
-  try {
-    const contacts = await listContacts()
-    const oldContact = contacts.find(({ id }) => id.toString() === contactId.toString())
-
-    if (oldContact) {
-      const newList = contacts.filter(({ id }) => id.toString() !== contactId.toString())
-      const newContact = { ...oldContact, ...body }
-      await fs.writeFile(contactsFile, JSON.stringify([...newList, newContact]))
-      return newContact
-    }
-
-    return null
-  } catch (err) {
-    onErr(err)
-  }
+const removeContact = async id => {
+  return await Contact.findByIdAndRemove({ _id: id })
 }
 
 module.exports = {
-  listContacts,
+  getAllContacts,
   getContactById,
-  removeContact,
-  addContact,
+  createContact,
   updateContact,
+  removeContact,
 }
