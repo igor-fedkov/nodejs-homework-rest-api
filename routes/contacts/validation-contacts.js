@@ -1,5 +1,7 @@
 const joi = require('joi')
 
+const { HttpCodes } = require('../../helpers/constants')
+
 const schemaCreateContact = joi.object({
   name: joi.string()
     .min(1)
@@ -42,7 +44,7 @@ const validate = async (schema, obj, next) => {
     return next()
   } catch (err) {
     next({
-      status: 400,
+      status: HttpCodes.BAD_REQUEST,
       message: err.message.replace(/"/g, "'")
     })
   }
